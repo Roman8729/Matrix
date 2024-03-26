@@ -1,0 +1,108 @@
+#include <iostream> // Подключение библиотеки для ввода/вывода данных
+#include <stdexcept> // Подключение библиотеки для обработки исключений
+
+class Matrix { // Объявление класса Matrix
+private: // Секция приватных членов класса
+    int* data; // Указатель на массив данных
+    int rows, cols; // Количество строк и столбцов матрицы
+    int state; // Переменная состояния для обработки ошибок
+
+public: // Секция публичных членов класса
+    Matrix() : rows(1), cols(1), state(0) { // Конструктор без параметров
+        data = new introws * cols; // Выделение памяти под один элемент и инициализация его нулем
+    }
+
+    Matrix(int size) : rows(size), cols(size), state(0) { // Конструктор с одним параметром
+        data = new int[rows * cols]; // Выделение памяти под квадратную матрицу заданного размера
+        for (int i = 0; i < rows * cols; i++) { // Цикл по элементам матрицы
+            data[i] = i; // Инициализация элементов номерами в массиве
+        }
+    }
+
+    Matrix(int rows, int cols) : rows(rows), cols(cols), state(0) { // Конструктор с двумя параметрами
+        data = new introws * cols; // Выделение памяти под матрицу заданного размера и инициализация ее нулями
+    }
+
+    ~Matrix() { // Деструктор
+        delete[] data; // Освобождение памяти
+    }
+
+    int& at(int i, int j) { // Метод для получения ссылки на элемент матрицы
+        if (i < 0 || i >= rows || j < 0 || j >= cols) { // Проверка индексов на допустимость
+            state = -1; // Установка кода ошибки
+            throw std::out_of_range("Index out of range"); // Генерация исключения
+        }
+        return data[i * cols + j]; // Возврат ссылки на элемент
+    }
+
+    void print() { // Метод для печати матрицы
+        for (int i = 0; i < rows; i++) { // Цикл по строкам матрицы
+            for (int j = 0; j < cols; j++) { // Цикл по столбцам матрицы
+                std::cout << at(i, j) << " "; // Вывод элемента
+            }
+            std::cout << std::endl; // Перевод строки
+        }
+    }
+
+    Matrix operator+(const Matrix& other) { // Оператор сложения матриц
+        if (rows != other.rows || cols != other.cols) { // Проверка размеров матриц на равенство
+            state = -1; // Установка кода ошибки
+            throw std::invalid_argument("Matrices must be the same size"); // Генерация исключения
+        }
+        Matrix result(rows, cols); // Создание результата
+        for (int i = 0; i < rows; i++) { // Цикл по строкам матрицы
+            for (int j = 0; j < cols; j++) { // Цикл по столбцам матрицы
+                result.at(i, j) = at(i, j) + other.at(i, j); // Сложение элементов
+            }
+        }
+        return result; // Возврат результата
+    }
+
+    Matrix operator-(const Matrix& other) { // Оператор вычитания матриц
+        if (rows != other.rows || cols != other.cols) { // Проверка размеров матриц на равенство
+            state = -1; // Установка кода ошибки
+            throw std::invalid_argument("Matrices must be the same size"); // Генерация исключения
+        }
+        Matrix result(rows, cols); // Создание результата
+        for (int i = 0; i < rows; i++) { // Цикл по строкам матрицы
+            for (int j = 0; j < cols; j++) { // Цикл по столбцам матрицы
+                result.at(i, j) = at(i, j) - other.at(i, j); // Вычитание элементов
+            }
+        }
+        return result; // Возврат результата
+    }
+
+    Matrix operator*(const Matrix& other) { // Оператор умножения матриц
+        if (cols != other.rows) { // Проверка размеров матриц на совместимость
+            state = -1; // Установка кода ошибки
+            throw std::invalid_argument("Number of columns in the first matrix must be equal to the number of rows in the second matrix"); // Генерация исключения
+        }
+        Matrix result(rows, other.cols); // Создание результата
+        for (int i = 0; i < rows; i++) { // Цикл по строкам первой матрицы
+            for (int j = 0; j < other.cols; j++) { // Цикл по столбцам второй матрицы
+                for (int k = 0; k < cols; k++) { // Цикл по элементам строки первой матрицы и столбца второй матрицы
+                    result.at(i, j) += at(i, k) * other.at(k, j); // Умножение и сложение элементов
+                }
+            }
+        }
+        return result; // Возврат результата
+    }
+
+    Matrix operator*(int scalar) { // Оператор умножения матрицы на скаляр
+        Matrix result(rows, cols); // Создание результата
+        for (int i = 0; i < rows; i++) { // Цикл по строкам матрицы
+            for (int j = 0; j < cols; j++) { // Цикл по столбцам матрицы
+                result.at(i, j) = at(i, j) * scalar; // Умножение элемента на скаляр
+            }
+        }
+        return result; // Возврат результата
+    }
+};
+
+int main() { // Начало основной функции программы
+    Matrix m1(2, 3); // Создание матрицы размером 2x3
+    Matrix m2(3, 2); // Создание матрицы размером 3x2
+    Matrix m3 = m1 * m2; // Умножение матриц
+    m3.print(); // Печать результата
+    return 0; // Завершение программы
+}
